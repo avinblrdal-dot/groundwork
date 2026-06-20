@@ -21,8 +21,8 @@ const fadeUp = (delay = 0) => ({
 })
 
 const founders = [
-  { name: 'Avin Agrawal', photo: '/founder-avin.jpg', initials: 'AA', quote: "[AVIN'S WORDS — TO BE FILLED IN]" },
-  { name: 'Ishaan Thakur', photo: '/founder-ishaan.jpg', initials: 'IT', quote: "[ISHAAN'S WORDS — TO BE FILLED IN]" },
+  { name: 'Avin Agrawal', photo: '/founder-avin.jpg', initials: 'AA', quote: "I grew up assuming everyone heard the same dinner-table conversations about money, risk, and building something from nothing. They don't. The first time I watched a kid realize they could actually sell something they made, it clicked for me — that spark isn't rare, the access to it is. Groundwork exists to put that access in the hands of the kids who'd never otherwise get it." },
+  { name: 'Ishaan Thakur', photo: '/founder-ishaan.jpg', initials: 'IT', quote: "Every program I'd seen taught kids about business and then sent them home with a worksheet and a certificate. None of them ended with a kid actually getting paid. We built Groundwork around the only proof that really matters — real money, earned by a real teenager doing real work. If they don't get paid, we haven't done our job yet." },
 ]
 
 export default function Founders() {
