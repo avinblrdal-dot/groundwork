@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Groundwork — Logo Animation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{ --primary:#7b79ff; --accent:#b683d6; --ink:#231f52; --logo:url('groundwork-gmark.png'); }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{ font-family:'Poppins',system-ui,sans-serif; color:var(--ink); overflow:hidden;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f6f4ff; }
+
+  /* Light, airy brand background (matches slide 8) */
+  .scene{ position:relative; width:100vw; height:100vh; overflow:hidden;
+    background:radial-gradient(ellipse 90% 80% at 50% 34%, #ffffff 0%, #f5f3ff 55%, #ece8ff 100%); }
+  .glowbg{ position:absolute; pointer-events:none; filter:blur(10px); }
+  .glowbg.g1{ top:-18%; right:-10%; width:55%; height:70%;
+    background:radial-gradient(ellipse 60% 60% at 60% 40%, rgba(182,131,214,.20) 0%, transparent 66%);
+    animation:bgPulse 12s ease-in-out infinite; }
+  .glowbg.g2{ bottom:-20%; left:-12%; width:55%; height:70%;
+    background:radial-gradient(ellipse 60% 60% at 40% 60%, rgba(123,121,255,.18) 0%, transparent 66%);
+    animation:bgPulse 15s ease-in-out infinite 3s; }
+  @keyframes bgPulse{ 0%,100%{ opacity:.8; transform:scale(1);} 50%{ opacity:1; transform:scale(1.08);} }
+  .grid{ position:absolute; inset:0; pointer-events:none; opacity:.6;
+    background-image:radial-gradient(circle, rgba(123,121,255,.09) 1.2px, transparent 1.2px);
+    background-size:30px 30px;
+    -webkit-mask-image:radial-gradient(ellipse 65% 65% at 50% 45%, #000 25%, transparent 72%); mask-image:radial-gradient(ellipse 65% 65% at 50% 45%, #000 25%, transparent 72%); }
+
+  /* Rising particles */
+  .particles{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .p{ position:absolute; bottom:34%; width:5px; height:5px; border-radius:50%;
+    background:radial-gradient(circle, var(--primary) 0%, rgba(123,121,255,.4) 55%, transparent 75%);
+    animation:rise var(--rd,3.4s) linear forwards; }
+  @keyframes rise{ 0%{ transform:translateY(0) scale(.6); opacity:0;} 14%{ opacity:.7;} 100%{ transform:translateY(-300px) scale(1); opacity:0;} }
+
+  .stage{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; }
+  .logo-wrap{ position:relative; width:min(54vh,54vw); max-width:460px; aspect-ratio:1/1; }
+
+  /* Soft brand aura (subtle, on light) */
+  .aura{ position:absolute; inset:-14%; border-radius:50%; opacity:0; transform:scale(.82); pointer-events:none;
+    background:radial-gradient(circle, rgba(123,121,255,.22) 0%, rgba(182,131,214,.12) 42%, transparent 68%); filter:blur(14px); }
+  .scene.play .aura{ animation:auraIn 1s ease-out .1s forwards, auraPulse 6s ease-in-out 2.6s infinite; }
+  @keyframes auraIn{ to{ opacity:1; transform:scale(1);} }
+  @keyframes auraPulse{ 0%,100%{ opacity:.8; transform:scale(1);} 50%{ opacity:1; transform:scale(1.05);} }
+
+  .logo-inner{ position:absolute; inset:0; }
+  .scene.play .logo-inner{ animation:floatY 6s ease-in-out 2.6s infinite; }
+  @keyframes floatY{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-8px);} }
+
+  /* REAL logo — builds up from the ground */
+  .logo-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+    opacity:0; transform:translateY(40px); clip-path:inset(100% 0 0 0);
+    filter:drop-shadow(0 14px 30px rgba(90,70,180,.22)); }
+  .scene.play .logo-img{ animation:emerge 1.5s cubic-bezier(.22,.9,.3,1) .5s forwards; }
+  @keyframes emerge{ 0%{ opacity:0; transform:translateY(40px); clip-path:inset(100% 0 0 0);} 100%{ opacity:1; transform:translateY(0); clip-path:inset(0 0 0 0);} }
+
+  /* Shine sweep masked to the exact logo */
+  .shine{ position:absolute; inset:0; pointer-events:none; opacity:0; mix-blend-mode:screen;
+    -webkit-mask:var(--logo) center/contain no-repeat; mask:var(--logo) center/contain no-repeat;
+    background:linear-gradient(115deg, transparent 40%, rgba(255,255,255,.85) 50%, transparent 60%);
+    background-size:250% 100%; background-repeat:no-repeat; }
+  .scene.play .shine{ animation:shineSweep 1.25s ease-in-out 2.2s forwards; }
+  @keyframes shineSweep{ 0%{ opacity:0; background-position:210% 0;} 25%{opacity:1;} 80%{opacity:1;} 100%{ opacity:0; background-position:-120% 0;} }
+
+  /* Star sparkle burst on the logo's star (upper-right) */
+  .star-fx{ position:absolute; top:27%; left:80%; width:24%; height:24%; transform:translate(-50%,-50%); pointer-events:none; }
+  .star-fx .g{ position:absolute; inset:0; border-radius:50%; opacity:0;
+    background:radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(123,121,255,.5) 34%, transparent 68%); }
+  .scene.play .star-fx .g{ animation:sparkGlow .7s ease-out 1.85s forwards, sparkTwinkle 2.8s ease-in-out 2.7s infinite; }
+  @keyframes sparkGlow{ 0%{opacity:0; transform:scale(.3);} 55%{opacity:1; transform:scale(1.15);} 100%{opacity:.8; transform:scale(1);} }
+  @keyframes sparkTwinkle{ 0%,100%{opacity:.5;} 50%{opacity:1;} }
+  .star-fx .cross{ position:absolute; inset:0; opacity:0; transform:scale(0) rotate(-30deg);
+    background:linear-gradient(0deg, transparent 46.5%, rgba(255,255,255,.95) 50%, transparent 53.5%), linear-gradient(90deg, transparent 46.5%, rgba(255,255,255,.95) 50%, transparent 53.5%);
+    -webkit-mask:radial-gradient(circle,#000 0%, transparent 68%); mask:radial-gradient(circle,#000 0%, transparent 68%); }
+  .scene.play .star-fx .cross{ animation:crossPop .6s cubic-bezier(.2,1.6,.4,1) 1.9s forwards; }
+  @keyframes crossPop{ 0%{opacity:0; transform:scale(0) rotate(-30deg);} 60%{opacity:1; transform:scale(1.2) rotate(4deg);} 100%{opacity:0; transform:scale(1.7) rotate(0);} }
+
+  .wordmark{ text-align:center; opacity:0; transform:translateY(14px); }
+  .scene.play .wordmark{ animation:wmUp .8s ease-out 2.6s forwards; }
+  @keyframes wmUp{ to{ opacity:1; transform:translateY(0);} }
+  .wordmark h1{ font-size:clamp(26px,4.4vh,46px); font-weight:800; letter-spacing:.012em; line-height:1; color:#231f52; }
+  .wordmark p{ margin-top:9px; font-size:clamp(10px,1.5vh,13px); font-weight:600; letter-spacing:.44em; text-transform:uppercase; color:#8b86c0; padding-left:.44em; }
+
+  .replay{ position:absolute; bottom:26px; left:50%; transform:translateX(-50%); display:inline-flex; align-items:center; gap:9px;
+    background:rgba(123,121,255,.1); border:1px solid rgba(123,121,255,.35); color:#5b57a5; font-family:inherit; font-size:13px; font-weight:600;
+    padding:10px 20px; border-radius:100px; cursor:pointer; transition:background .2s, transform .2s, border-color .2s; }
+  .replay:hover{ background:rgba(123,121,255,.2); border-color:rgba(123,121,255,.6); transform:translateX(-50%) translateY(-2px); }
+  .replay svg{ width:15px; height:15px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .scene.play *{ animation-duration:.001s !important; animation-delay:0s !important; }
+    .logo-img{ opacity:1; transform:none; clip-path:inset(0 0 0 0);} .aura,.wordmark{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="scene" id="scene">
+    <div class="glowbg g1"></div>
+    <div class="glowbg g2"></div>
+    <div class="grid"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="stage">
+      <div class="logo-wrap">
+        <div class="aura"></div>
+        <div class="logo-inner">
+          <img class="logo-img" src="groundwork-gmark.png" alt="Groundwork logo" />
+          <div class="shine"></div>
+          <div class="star-fx"><div class="g"></div><div class="cross"></div></div>
+        </div>
+      </div>
+
+      <div class="wordmark">
+        <h1>GROUNDWORK</h1>
+        <p>Initiative</p>
+      </div>
+    </div>
+
+    <button class="replay" id="replay" aria-label="Replay animation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Replay
+    </button>
+  </div>
+
+<script>
+  (function(){
+    const box=document.getElementById('particles'); let on=false;
+    setTimeout(()=>{on=true;},1700);
+    setInterval(()=>{ if(!on) return; const p=document.createElement('div'); p.className='p';
+      p.style.left=(44+Math.random()*18)+'%'; const dur=(2.8+Math.random()*2).toFixed(2); p.style.setProperty('--rd',dur+'s');
+      const size=(Math.random()*3+3).toFixed(1); p.style.width=p.style.height=size+'px';
+      box.appendChild(p); setTimeout(()=>p.remove(), dur*1000+120); }, 260);
+  })();
+  const scene=document.getElementById('scene');
+  function start(){ scene.classList.add('play'); }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>setTimeout(start,60)); } else { setTimeout(start,300); }
+  document.getElementById('replay').addEventListener('click', function(){
+    scene.classList.remove('play'); void scene.offsetWidth; scene.classList.add('play');
+  });
+</script>
+</body>
+</html>

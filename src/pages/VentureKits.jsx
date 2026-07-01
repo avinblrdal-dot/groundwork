@@ -92,7 +92,7 @@ export default function VentureKits() {
     e.preventDefault()
     const subject = encodeURIComponent('VentureKits Order Request')
     const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nOrganization: ${form.org}\nRole: ${form.role}\nNumber of Kits: ${form.qty}\nKits Requested: ${form.kits.join(', ')}\n\nNotes:\n${form.notes}`)
-    window.location.href = `mailto:help.groundwork@gmail.com?subject=${subject}&body=${body}`
+    window.location.href = `mailto:contact@groundworkinitiative.com?subject=${subject}&body=${body}`
   }
 
   return (

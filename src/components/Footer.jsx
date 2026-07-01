@@ -128,8 +128,8 @@ export default function Footer() {
               },
               {
                 label: 'Email',
-                href: 'mailto:help.groundwork@gmail.com',
-                text: 'help.groundwork@gmail.com',
+                href: 'mailto:contact@groundworkinitiative.com',
+                text: 'contact@groundworkinitiative.com',
               },
             ].map((item) => (
               <a

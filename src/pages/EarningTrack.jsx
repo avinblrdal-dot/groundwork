@@ -219,7 +219,7 @@ export default function EarningTrack() {
               like to try selling.
             </p>
             <a
-              href="mailto:help.groundwork@gmail.com?subject=Earning%20Track%20Application"
+              href="mailto:contact@groundworkinitiative.com?subject=Earning%20Track%20Application"
               style={{
                 display: 'inline-block',
                 position: 'relative',

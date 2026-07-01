@@ -110,7 +110,7 @@ export default function Founders() {
               directly — reach out.
             </p>
             <a
-              href="mailto:help.groundwork@gmail.com"
+              href="mailto:contact@groundworkinitiative.com"
               style={{
                 display: 'inline-block',
                 position: 'relative',

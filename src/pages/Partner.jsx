@@ -27,21 +27,21 @@ const partnerCards = [
     title: 'Schools & Hospitals',
     body: 'We distribute VentureKits directly into Title I classrooms and pediatric wards through institutional partnerships. No cost to participants or families.',
     btnLabel: 'Get in Touch',
-    href: 'mailto:help.groundwork@gmail.com?subject=School%2FHospital%20Partnership%20Inquiry',
+    href: 'mailto:contact@groundworkinitiative.com?subject=School%2FHospital%20Partnership%20Inquiry',
   },
   {
     icon: Handshake,
     title: 'Corporate Partners',
     body: 'Support kit production, cohort funding, or chapter expansion. Partnership structures are flexible and built around your CSR priorities and reporting requirements.',
     btnLabel: 'Get in Touch',
-    href: 'mailto:help.groundwork@gmail.com?subject=Corporate%20Partnership%20Inquiry',
+    href: 'mailto:contact@groundworkinitiative.com?subject=Corporate%20Partnership%20Inquiry',
   },
   {
     icon: Globe,
     title: 'Start a Chapter',
     body: "Student founders in new cities handle local kit assembly, distribution, and cohort recruitment under Groundwork's curriculum and brand standards.",
     btnLabel: 'Apply',
-    href: 'mailto:help.groundwork@gmail.com?subject=Chapter%20Application',
+    href: 'mailto:contact@groundworkinitiative.com?subject=Chapter%20Application',
   },
 ]
 
@@ -148,7 +148,7 @@ export default function Partner() {
             </div>
             <div style={{ textAlign: 'center' }}>
               <a
-                href="mailto:help.groundwork@gmail.com?subject=Leadership%2FVolunteer%20Application"
+                href="mailto:contact@groundworkinitiative.com?subject=Leadership%2FVolunteer%20Application"
                 style={{
                   display: 'inline-block',
                   position: 'relative',

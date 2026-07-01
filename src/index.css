@@ -143,3 +143,65 @@ button {
   box-shadow: 0 0 0 2px rgba(123,121,255,0.55), 0 24px 60px rgba(123,121,255,0.28) !important;
   transform: translateY(-3px) !important;
 }
+
+/* Contact form — dark glass inputs */
+.gw-field {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.gw-field::placeholder { color: rgba(221,214,254,0.4); }
+.gw-field:focus {
+  border-color: #7b79ff;
+  background: rgba(123,121,255,0.08);
+  box-shadow: 0 0 0 3px rgba(123,121,255,0.18);
+}
+.gw-field[aria-invalid="true"] { border-color: #ef6a8c; }
+
+/* Glass pills + social buttons (Contact) */
+.gw-glass-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 100px;
+  padding: 11px 18px;
+  font-size: 14px;
+  color: rgba(221,214,254,0.9);
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+.gw-glass-pill:hover {
+  background: rgba(123,121,255,0.14);
+  border-color: rgba(123,121,255,0.4);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.gw-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(221,214,254,0.9);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+.gw-social-btn:hover {
+  background: rgba(123,121,255,0.16);
+  border-color: rgba(123,121,255,0.45);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
