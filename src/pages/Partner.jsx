@@ -41,8 +41,8 @@ const partnerCards = [
     icon: Globe,
     title: 'Start a Chapter',
     body: "Student founders in new cities handle local kit assembly, distribution, and cohort recruitment under Groundwork's curriculum and brand standards.",
-    btnLabel: 'Apply',
-    href: '/contact',
+    btnLabel: 'Register a Chapter',
+    href: 'https://docs.google.com/forms/d/e/1FAIpQLSe_kDp4XNykWTwoAidz1Op2LDS2hWHCS1UL9KhJImWAYplKdQ/viewform',
   },
 ]
 
@@ -124,7 +124,7 @@ export default function Partner() {
                       {card.btnLabel}
                     </Link>
                   ) : (
-                    <a href={card.href} style={btnStyle} {...btnHandlers}>
+                    <a href={card.href} target="_blank" rel="noopener noreferrer" style={btnStyle} {...btnHandlers}>
                       {card.btnLabel}
                     </a>
                   )}
