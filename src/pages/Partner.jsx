@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Building2, Handshake, Globe } from 'lucide-react'
 
 const PRIMARY_BTN_CLIP = 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)'
@@ -27,21 +28,21 @@ const partnerCards = [
     title: 'Schools & Hospitals',
     body: 'We distribute VentureKits directly into Title I classrooms and pediatric wards through institutional partnerships. No cost to participants or families.',
     btnLabel: 'Get in Touch',
-    href: 'mailto:contact@groundworkinitiative.com?subject=School%2FHospital%20Partnership%20Inquiry',
+    href: '/contact',
   },
   {
     icon: Handshake,
     title: 'Corporate Partners',
     body: 'Support kit production, cohort funding, or chapter expansion. Partnership structures are flexible and built around your CSR priorities and reporting requirements.',
     btnLabel: 'Get in Touch',
-    href: 'mailto:contact@groundworkinitiative.com?subject=Corporate%20Partnership%20Inquiry',
+    href: '/contact',
   },
   {
     icon: Globe,
     title: 'Start a Chapter',
     body: "Student founders in new cities handle local kit assembly, distribution, and cohort recruitment under Groundwork's curriculum and brand standards.",
     btnLabel: 'Apply',
-    href: 'mailto:contact@groundworkinitiative.com?subject=Chapter%20Application',
+    href: '/contact',
   },
 ]
 
@@ -82,45 +83,54 @@ export default function Partner() {
           {/* Partner cards */}
           <KickerRule label="Partnership Types" />
           <div style={{ display: 'grid', gap: '24px', marginBottom: '80px' }} className="grid-cols-1 md:grid-cols-3">
-            {partnerCards.map((card, i) => (
-              <motion.div
-                key={card.title}
-                {...fadeUp(i * 0.1)}
-                className="gw-card" style={{ background: 'white', border: '1px solid #ddd6fe', borderRadius: '16px', padding: '40px' }}
-              >
-                <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(221,214,254,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-                  <card.icon size={22} color="#5555a2" strokeWidth={1.5} />
-                </div>
-                <h3 style={{ marginBottom: '12px' }}>{card.title}</h3>
-                <p>{card.body}</p>
-                <a
-                  href={card.href}
-                  style={{
-                    display: 'inline-block',
-                    border: '1.5px solid #5555a2',
-                    color: '#5555a2',
-                    background: 'transparent',
-                    borderRadius: '4px',
-                    padding: '12px 24px',
-                    fontWeight: 600,
-                    fontSize: '15px',
-                    textDecoration: 'none',
-                    marginTop: '20px',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.background = 'rgba(85,85,162,0.04)'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.background = 'transparent'
-                  }}
+            {partnerCards.map((card, i) => {
+              const isInternal = card.href.startsWith('/')
+              const btnStyle = {
+                display: 'inline-block',
+                border: '1.5px solid #5555a2',
+                color: '#5555a2',
+                background: 'transparent',
+                borderRadius: '4px',
+                padding: '12px 24px',
+                fontWeight: 600,
+                fontSize: '15px',
+                textDecoration: 'none',
+                marginTop: '20px',
+                transition: 'all 0.2s ease',
+              }
+              const btnHandlers = {
+                onMouseEnter: e => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.background = 'rgba(85,85,162,0.04)'
+                },
+                onMouseLeave: e => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.background = 'transparent'
+                },
+              }
+              return (
+                <motion.div
+                  key={card.title}
+                  {...fadeUp(i * 0.1)}
+                  className="gw-card" style={{ background: 'white', border: '1px solid #ddd6fe', borderRadius: '16px', padding: '40px' }}
                 >
-                  {card.btnLabel}
-                </a>
-              </motion.div>
-            ))}
+                  <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(221,214,254,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                    <card.icon size={22} color="#5555a2" strokeWidth={1.5} />
+                  </div>
+                  <h3 style={{ marginBottom: '12px' }}>{card.title}</h3>
+                  <p>{card.body}</p>
+                  {isInternal ? (
+                    <Link to={card.href} style={btnStyle} {...btnHandlers}>
+                      {card.btnLabel}
+                    </Link>
+                  ) : (
+                    <a href={card.href} style={btnStyle} {...btnHandlers}>
+                      {card.btnLabel}
+                    </a>
+                  )}
+                </motion.div>
+              )
+            })}
           </div>
 
           {/* Join the Team */}
@@ -147,8 +157,8 @@ export default function Partner() {
               ))}
             </div>
             <div style={{ textAlign: 'center' }}>
-              <a
-                href="mailto:contact@groundworkinitiative.com?subject=Leadership%2FVolunteer%20Application"
+              <Link
+                to="/contact"
                 style={{
                   display: 'inline-block',
                   position: 'relative',
@@ -176,7 +186,7 @@ export default function Partner() {
               >
                 <span className="btn-shimmer-inner" />
                 Apply to Get Involved
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>

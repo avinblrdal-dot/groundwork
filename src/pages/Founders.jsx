@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 
 const PRIMARY_BTN_CLIP = 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)'
 
@@ -109,8 +110,8 @@ export default function Founders() {
               cohort, and completing the 501(c)(3) filing process. If you want to support them
               directly — reach out.
             </p>
-            <a
-              href="mailto:contact@groundworkinitiative.com"
+            <Link
+              to="/contact"
               style={{
                 display: 'inline-block',
                 position: 'relative',
@@ -139,7 +140,7 @@ export default function Founders() {
             >
               <span className="btn-shimmer-inner" />
               Reach Out
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>

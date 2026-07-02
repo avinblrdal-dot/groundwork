@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Calendar, Users, DollarSign } from 'lucide-react'
 
 const PRIMARY_BTN_CLIP = 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)'
@@ -218,8 +219,8 @@ export default function EarningTrack() {
               Cohorts are small and filled by application. Email us with your name and what you'd
               like to try selling.
             </p>
-            <a
-              href="mailto:contact@groundworkinitiative.com?subject=Earning%20Track%20Application"
+            <Link
+              to="/contact"
               style={{
                 display: 'inline-block',
                 position: 'relative',
@@ -247,7 +248,7 @@ export default function EarningTrack() {
             >
               <span className="btn-shimmer-inner" />
               Apply for Next Cohort
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
