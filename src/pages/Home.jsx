@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useScroll, useInView, useReducedMotion } from 'framer-motion'
+import { motion, useScroll, useInView, useReducedMotion, useMotionValue, useSpring } from 'framer-motion'
 import { Package, Target, Building2, HeartPulse, ArrowRight } from 'lucide-react'
 
 const PRIMARY_BTN_CLIP = 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%)'
@@ -20,7 +20,7 @@ function KickerRule({ label, center = false }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', justifyContent: center ? 'center' : 'flex-start' }}>
       <div style={{ width: '40px', height: '1px', background: '#7b79ff', flexShrink: 0 }} />
-      <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#9c9cd1' }}>
+      <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#5f5c94' }}>
         {label}
       </span>
       {center && <div style={{ width: '40px', height: '1px', background: '#7b79ff', flexShrink: 0 }} />}
@@ -31,8 +31,9 @@ function KickerRule({ label, center = false }) {
 function AngledDivider({ from, to }) {
   return (
     <div style={{ background: from, lineHeight: 0 }}>
-      <svg viewBox="0 0 1440 72" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: '72px' }}>
-        <polygon points="0,72 1440,0 1440,72" fill={to} />
+      <svg viewBox="0 0 1440 48" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: '48px' }}>
+        {/* Gentle asymmetric curve — softer, more premium than a hard diagonal */}
+        <path d="M0,48 C 420,8 1020,8 1440,44 L1440,48 L0,48 Z" fill={to} />
       </svg>
     </div>
   )
@@ -73,37 +74,6 @@ function BtnPrimary({ to, children, style: extraStyle = {} }) {
     </Link>
   )
 }
-
-function BtnOutlined({ to, children, dark = false, style: extraStyle = {} }) {
-  const [hovered, setHovered] = useState(false)
-  return (
-    <Link
-      to={to}
-      style={{
-        display: 'inline-block',
-        border: dark ? '1.5px solid rgba(221,214,254,0.38)' : '1.5px solid #5555a2',
-        color: dark ? 'rgba(221,214,254,0.92)' : '#5555a2',
-        background: hovered
-          ? (dark ? 'rgba(221,214,254,0.08)' : 'rgba(85,85,162,0.06)')
-          : 'transparent',
-        borderRadius: '4px',
-        padding: '13px 30px',
-        fontWeight: 600,
-        fontSize: '15px',
-        textDecoration: 'none',
-        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-        transition: 'all 0.25s ease',
-        cursor: 'pointer',
-        ...extraStyle,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {children}
-    </Link>
-  )
-}
-
 
 const steps = [
   { label: 'Exposure', sub: 'See it exist' },
@@ -261,7 +231,7 @@ function TwoGapsSection() {
               One Solution.
             </span>
           </h2>
-          <p style={{ fontSize: '18px', color: '#3d3a52', marginTop: '12px' }}>
+          <p style={{ fontSize: '18px', color: '#3d3a52', marginTop: '12px', maxWidth: '580px' }}>
             The opportunity gap isn't just about access — it's about exposure and outcomes.
           </p>
         </div>
@@ -347,115 +317,94 @@ function TwoGapsSection() {
   )
 }
 
-// Deterministic pseudo-random so the starfield is stable across renders
-function rand(n) {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
-  return x - Math.floor(x)
-}
-
-// Scatter ~160 stars in a disc, denser toward the core (sqrt distribution)
-const GALAXY_STARS = Array.from({ length: 160 }, (_, i) => {
-  const ang = rand(i) * Math.PI * 2
-  const radius = 40 + Math.sqrt(rand(i + 50)) * 470
-  return {
-    cx: 500 + Math.cos(ang) * radius,
-    cy: 500 + Math.sin(ang) * radius,
-    r: 0.5 + rand(i + 100) * 1.9,
-    op: 0.18 + rand(i + 150) * 0.55,
-    twinkle: rand(i + 200) > 0.62,
-    dur: (2 + rand(i + 250) * 3.6).toFixed(2),
-    delay: (rand(i + 300) * 4.5).toFixed(2),
-  }
-})
-
-function GalaxyHero() {
+// Full-page starfield that slowly revolves around the hero center (the logo),
+// rendered on canvas as crisp round sprites. Reduced-motion → static field.
+function StarCanvas() {
   const shouldReduce = useReducedMotion()
-  const C = 500
-  const ring = (dur, dir = 1) =>
-    shouldReduce ? {} : { animate: { rotate: 360 * dir }, transition: { duration: dur, repeat: Infinity, ease: 'linear' } }
-  const o = { originX: '500px', originY: '500px' }
-  const pulse = (dur, delay = 0) =>
-    shouldReduce ? {} : { animate: { opacity: [0.1, 0.22, 0.1], scale: [1, 1.09, 1] }, transition: { duration: dur, repeat: Infinity, ease: 'easeInOut', delay } }
+  const ref = useRef(null)
 
-  return (
-    <div style={{ position: 'absolute', top: '46%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(1600px, 168vw)', pointerEvents: 'none', zIndex: 0 }}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 0.6, scale: 1 }}
-        transition={{ duration: 1.8, ease: 'easeOut', delay: 0.1 }}
-        style={{ position: 'relative', width: '100%' }}
-      >
-        {/* Tilted galactic disc */}
-        <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', transform: 'perspective(1300px) rotateX(64deg)' }}>
-          <svg viewBox="0 0 1000 1000" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true">
-            <defs>
-              <radialGradient id="galCore" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#cdc4ff" stopOpacity="0.42" />
-                <stop offset="34%" stopColor="#7b79ff" stopOpacity="0.22" />
-                <stop offset="68%" stopColor="#5555a2" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#7b79ff" stopOpacity="0" />
-              </radialGradient>
-              <linearGradient id="galRing" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#a78bfa" />
-                <stop offset="50%" stopColor="#8b89ff" />
-                <stop offset="100%" stopColor="#b683d6" />
-              </linearGradient>
-              <linearGradient id="cometTail" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
-                <stop offset="100%" stopColor="#e8d2ff" stopOpacity="0.95" />
-              </linearGradient>
-              <linearGradient id="cometTail2" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#e8d2ff" stopOpacity="0.95" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </linearGradient>
-              <radialGradient id="neb1" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#7b79ff" /><stop offset="100%" stopColor="#7b79ff" stopOpacity="0" />
-              </radialGradient>
-              <radialGradient id="neb2" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#b683d6" /><stop offset="100%" stopColor="#b683d6" stopOpacity="0" />
-              </radialGradient>
-              <radialGradient id="neb3" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#5b6bd6" /><stop offset="100%" stopColor="#5b6bd6" stopOpacity="0" />
-              </radialGradient>
-              <filter id="galGlow" x="-60%" y="-60%" width="220%" height="220%">
-                <feGaussianBlur stdDeviation="5" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-              <filter id="nebBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="22" />
-              </filter>
-            </defs>
+  useEffect(() => {
+    const cv = ref.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')
+    const DPR = Math.min(window.devicePixelRatio || 1, 2)
+    const rand = (a, b) => a + Math.random() * (b - a)
+    let W = 0, H = 0, stars = [], parts = [], shoot = null, nextShoot = 0, raf = 0, last = 0, running = true
 
-            {/* Nebula gas clouds */}
-            <motion.ellipse cx="372" cy="430" rx="280" ry="190" fill="url(#neb1)" filter="url(#nebBlur)" style={{ originX: '372px', originY: '430px' }} {...pulse(11)} />
-            <motion.ellipse cx="640" cy="560" rx="240" ry="170" fill="url(#neb2)" filter="url(#nebBlur)" style={{ originX: '640px', originY: '560px' }} {...pulse(13, 2.5)} />
-            <motion.ellipse cx="560" cy="360" rx="220" ry="150" fill="url(#neb3)" filter="url(#nebBlur)" style={{ originX: '560px', originY: '360px' }} {...pulse(15, 5)} />
+    // soft round star sprite (crisp at any zoom, cheap to blit)
+    const sp = document.createElement('canvas'); const S = 48; sp.width = sp.height = S
+    {
+      const s = sp.getContext('2d')
+      const g = s.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2)
+      g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.35, 'rgba(234,228,255,.95)'); g.addColorStop(1, 'rgba(234,228,255,0)')
+      s.fillStyle = g; s.beginPath(); s.arc(S / 2, S / 2, S / 2, 0, 6.2832); s.fill()
+    }
 
-            {/* Ambient core glow */}
-            <circle cx={C} cy={C} r="490" fill="url(#galCore)" />
+    function build() {
+      const diag = Math.hypot(W, H), maxR = diag * 0.72, dir = Math.random() < 0.5 ? 1 : -1
+      const n = Math.round(Math.min(340, (W * H) / 6500)); stars = []
+      for (let i = 0; i < n; i++) {
+        const radv = Math.sqrt(Math.random()) * maxR
+        const av = dir * (0.023 + 0.016 * (1 - radv / maxR)) * rand(0.85, 1.15)
+        stars.push({ rad: radv, ang: rand(0, 6.2832), av, r: rand(0.6, 2.3), a: rand(0.2, 0.9), tw: rand(0.4, 1.6), ph: rand(0, 6.28) })
+      }
+      parts = []
+      for (let j = 0; j < 9; j++) {
+        const pr = Math.sqrt(Math.random()) * maxR * 0.9
+        parts.push({ rad: pr, ang: rand(0, 6.2832), av: dir * (0.015 + rand(0, 0.011)), r: rand(1.4, 2.8), a: rand(0.25, 0.6), ph: rand(0, 6.28) })
+      }
+    }
+    function resize() {
+      const r = cv.getBoundingClientRect(); W = Math.round(r.width); H = Math.round(r.height)
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); build()
+    }
+    function draw(t) {
+      const dt = last ? Math.min((t - last) / 1000, 0.05) : 0; last = t
+      ctx.clearRect(0, 0, W, H)
+      const cxc = W * 0.5, cyc = H * 0.49
+      for (const s of stars) {
+        s.ang += s.av * dt
+        const x = cxc + s.rad * Math.cos(s.ang), y = cyc + s.rad * Math.sin(s.ang)
+        if (x < -6 || x > W + 6 || y < -6 || y > H + 6) continue
+        const a = s.a * (0.6 + 0.4 * Math.sin(t * 0.001 * s.tw + s.ph)); const d = s.r * 3.5
+        ctx.globalAlpha = Math.max(0, a); ctx.drawImage(sp, x - d, y - d, d * 2, d * 2)
+      }
+      for (const p of parts) {
+        p.ang += p.av * dt
+        const px = cxc + p.rad * Math.cos(p.ang), py = cyc + p.rad * Math.sin(p.ang), rr = p.r
+        if (px < -30 || px > W + 30 || py < -30 || py > H + 30) continue
+        const g = ctx.createRadialGradient(px, py, 0, px, py, rr * 6)
+        g.addColorStop(0, `rgba(190,170,255,${p.a})`); g.addColorStop(1, 'rgba(190,170,255,0)')
+        ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, rr * 6, 0, 6.2832); ctx.fill()
+        ctx.globalAlpha = Math.min(1, p.a + 0.2); ctx.fillStyle = '#e7deff'; ctx.beginPath(); ctx.arc(px, py, rr * 0.7, 0, 6.2832); ctx.fill()
+      }
+      if (!shoot && t > nextShoot) {
+        const fl = Math.random() < 0.5
+        shoot = { t: 0, dur: rand(650, 900), x: rand(0.1, 0.6), y: rand(0.08, 0.4), vx: (fl ? 1 : -1) * rand(0.5, 0.8), vy: rand(0.18, 0.34), len: rand(90, 150) }
+      }
+      if (shoot) {
+        shoot.t += dt * 1000; const pr = shoot.t / shoot.dur
+        if (pr >= 1) { shoot = null; nextShoot = t + rand(20000, 40000) }
+        else {
+          const ease = pr < 0.5 ? 1 : (1 - (pr - 0.5) / 0.5)
+          const sx = (shoot.x + shoot.vx * pr) * W, sy = (shoot.y + shoot.vy * pr) * H, ex = sx - shoot.vx * shoot.len, ey = sy - shoot.vy * shoot.len
+          const lg = ctx.createLinearGradient(sx, sy, ex, ey)
+          lg.addColorStop(0, `rgba(255,255,255,${0.9 * ease})`); lg.addColorStop(0.4, `rgba(190,170,255,${0.5 * ease})`); lg.addColorStop(1, 'rgba(190,170,255,0)')
+          ctx.globalAlpha = 1; ctx.strokeStyle = lg; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke()
+        }
+      }
+      ctx.globalAlpha = 1
+      if (running && !shouldReduce) raf = requestAnimationFrame(draw)
+    }
 
-            {/* Drifting starfield */}
-            <motion.g style={o} {...ring(240)}>
-              {GALAXY_STARS.map((s, i) => (
-                <circle
-                  key={i}
-                  cx={s.cx} cy={s.cy} r={s.r}
-                  fill="#eae4ff"
-                  style={
-                    s.twinkle && !shouldReduce
-                      ? { animation: `gwTwinkle ${s.dur}s ease-in-out ${s.delay}s infinite` }
-                      : { opacity: s.op }
-                  }
-                />
-              ))}
-            </motion.g>
+    resize()
+    const onResize = () => resize()
+    window.addEventListener('resize', onResize)
+    if (shouldReduce) { draw(0) } else { nextShoot = performance.now() + rand(6000, 12000); raf = requestAnimationFrame(draw) }
+    return () => { running = false; cancelAnimationFrame(raf); window.removeEventListener('resize', onResize) }
+  }, [shouldReduce])
 
-          </svg>
-        </div>
-
-      </motion.div>
-    </div>
-  )
+  return <canvas ref={ref} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', zIndex: 0, pointerEvents: 'none' }} />
 }
 
 const LOGO_MASK = {
@@ -487,13 +436,23 @@ function HeroLogo() {
         style={{ position: 'absolute', inset: '-10%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,121,255,0.55) 0%, rgba(182,131,214,0.2) 42%, transparent 68%)', filter: 'blur(24px)' }}
       />
 
+      {/* Faint concentric orbit rings */}
+      {[{ s: 80, c: 'rgba(167,139,250,0.16)', d: 9, dl: 0 }, { s: 108, c: 'rgba(139,137,255,0.12)', d: 11, dl: 1.5 }, { s: 138, c: 'rgba(182,131,214,0.09)', d: 13, dl: 3 }].map((r, i) => (
+        <motion.div
+          key={`ring-${i}`}
+          animate={shouldReduce ? {} : { scale: [1, 1.02, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: r.d, repeat: Infinity, ease: 'easeInOut', delay: r.dl }}
+          style={{ position: 'absolute', top: '50%', left: '50%', width: `${r.s}%`, height: `${r.s}%`, transform: 'translate(-50%, -50%)', borderRadius: '50%', border: `1px solid ${r.c}` }}
+        />
+      ))}
+
       {/* Pulsing halo rings */}
-      {!shouldReduce && [0, 1, 2].map(i => (
+      {!shouldReduce && [0, 1, 2, 3, 4].map(i => (
         <motion.div
           key={`halo-${i}`}
           initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1.55, opacity: [0, 0.4, 0] }}
-          transition={{ duration: 4.8, repeat: Infinity, delay: i * 1.6, ease: 'easeOut' }}
+          animate={{ scale: 1.7, opacity: [0, 0.42, 0] }}
+          transition={{ duration: 5, repeat: Infinity, delay: i * 1, ease: 'easeOut' }}
           style={{ position: 'absolute', top: '50%', left: '50%', width: '56%', height: '56%', marginLeft: '-28%', marginTop: '-28%', borderRadius: '50%', border: '1px solid rgba(167,139,250,0.5)' }}
         />
       ))}
@@ -542,40 +501,74 @@ function HeroLogo() {
 
 export default function Home() {
   const shouldReduce = useReducedMotion()
+  // Subtle mouse parallax for the hero atmosphere
+  const pmx = useMotionValue(0)
+  const pmy = useMotionValue(0)
+  const psx = useSpring(pmx, { stiffness: 50, damping: 18, mass: 0.4 })
+  const psy = useSpring(pmy, { stiffness: 50, damping: 18, mass: 0.4 })
+  const onHeroMove = (e) => {
+    if (shouldReduce) return
+    pmx.set(((e.clientX / window.innerWidth) - 0.5) * -10)
+    pmy.set(((e.clientY / window.innerHeight) - 0.5) * -10)
+  }
   return (
     <>
-      {/* HERO — Dark Aurora */}
-      <section style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #06041a 0%, #0d0926 45%, #090718 100%)', paddingTop: '120px', paddingBottom: '96px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      {/* HERO — Cinematic Space */}
+      <section onMouseMove={onHeroMove} style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #06041a 0%, #0d0926 45%, #090718 100%)', paddingTop: '120px', paddingBottom: '96px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
 
-        {/* Grid texture */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(123,121,255,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(123,121,255,0.055) 1px, transparent 1px)', backgroundSize: '44px 44px', pointerEvents: 'none', zIndex: 0 }} />
+        {/* Cinematic space atmosphere — moves subtly with the mouse (parallax) */}
+        <motion.div style={{ position: 'absolute', inset: 0, x: psx, y: psy, zIndex: 0, pointerEvents: 'none' }}>
+          {/* Static space photo base */}
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero-space.png)', backgroundSize: 'cover', backgroundPosition: 'center 80%', transform: 'scale(1.06)' }} />
+          {/* Deep-space color grade (from the original hero) */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, #06041a 0%, #0d0926 45%, #090718 100%)', opacity: 0.34 }} />
 
-        {/* Aurora layer 1 — dominant nebula, upper-right (electric violet) */}
-        <motion.div
-          animate={shouldReduce ? {} : { scale: [1, 1.1, 1], opacity: [0.88, 1, 0.88] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', top: '-30%', right: '-18%', width: '78%', height: '100%', background: 'radial-gradient(ellipse 68% 62% at 58% 28%, rgba(112,38,180,0.97) 0%, rgba(80,50,155,0.72) 32%, rgba(48,35,110,0.38) 58%, transparent 75%)', pointerEvents: 'none', zIndex: 0 }}
-        />
+          {/* Aurora layer 1 — electric violet, upper-right (screen-blended glow) */}
+          <motion.div
+            animate={shouldReduce ? {} : { scale: [1, 1.1, 1], opacity: [0.85, 1, 0.85] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', top: '-30%', right: '-18%', width: '78%', height: '100%', background: 'radial-gradient(ellipse 68% 62% at 58% 28%, rgba(120,42,192,0.9) 0%, rgba(88,56,168,0.62) 32%, rgba(60,44,130,0.32) 58%, transparent 75%)', mixBlendMode: 'screen' }}
+          />
+          {/* Aurora layer 2 — deep indigo, lower-left */}
+          <motion.div
+            animate={shouldReduce ? {} : { scale: [1, 1.07, 1], opacity: [0.6, 0.82, 0.6] }}
+            transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 3.5 }}
+            style={{ position: 'absolute', bottom: '-28%', left: '-22%', width: '68%', height: '78%', background: 'radial-gradient(ellipse 58% 48% at 38% 58%, rgba(66,48,158,0.8) 0%, rgba(58,44,140,0.5) 38%, transparent 65%)', mixBlendMode: 'screen' }}
+          />
+          {/* Central soft pulse */}
+          <motion.div
+            animate={shouldReduce ? {} : { opacity: [0.24, 0.42, 0.24], scale: [0.95, 1.06, 0.95] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+            style={{ position: 'absolute', top: '42%', left: '50%', transform: 'translate(-50%, -50%)', width: '60%', height: '55%', background: 'radial-gradient(ellipse, rgba(123,121,255,0.26) 0%, transparent 65%)', filter: 'blur(18px)', mixBlendMode: 'screen' }}
+          />
 
-        {/* Aurora layer 2 — depth, lower-left (deep indigo) */}
-        <motion.div
-          animate={shouldReduce ? {} : { scale: [1, 1.07, 1], opacity: [0.65, 0.85, 0.65] }}
-          transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 3.5 }}
-          style={{ position: 'absolute', bottom: '-28%', left: '-22%', width: '68%', height: '78%', background: 'radial-gradient(ellipse 58% 48% at 38% 58%, rgba(28,18,85,0.88) 0%, rgba(55,42,138,0.55) 38%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }}
-        />
+          {/* Animated grid */}
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(123,121,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(123,121,255,0.5) 1px, transparent 1px)', backgroundSize: '64px 64px', opacity: 0.15, WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 30%, transparent 85%)', maskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 30%, transparent 85%)' }} />
 
-        {/* Central soft pulse — brand primary glow */}
-        <motion.div
-          animate={shouldReduce ? {} : { opacity: [0.22, 0.38, 0.22], scale: [0.95, 1.06, 0.95] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
-          style={{ position: 'absolute', top: '42%', left: '50%', transform: 'translate(-50%, -50%)', width: '60%', height: '55%', background: 'radial-gradient(ellipse, rgba(123,121,255,0.22) 0%, transparent 65%)', filter: 'blur(18px)', pointerEvents: 'none', zIndex: 0 }}
-        />
+          {/* Light rays from the horizon */}
+          <motion.div
+            animate={shouldReduce ? {} : { opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', left: '50%', bottom: '6%', width: '150vmax', height: '80vmax', transform: 'translateX(-50%)', background: 'conic-gradient(from 200deg at 50% 100%, transparent 0deg, rgba(160,140,255,0.10) 8deg, transparent 16deg, transparent 26deg, rgba(160,140,255,0.07) 34deg, transparent 42deg, transparent 52deg, rgba(190,160,255,0.10) 60deg, transparent 68deg)', filter: 'blur(14px)', WebkitMaskImage: 'radial-gradient(60% 70% at 50% 100%, #000 0%, transparent 72%)', maskImage: 'radial-gradient(60% 70% at 50% 100%, #000 0%, transparent 72%)' }}
+          />
+          {/* Horizon bloom */}
+          <motion.div
+            animate={shouldReduce ? {} : { opacity: [0.65, 1, 0.65], scale: [1, 1.06, 1] }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', left: '50%', bottom: '14%', width: '70%', height: '34%', transform: 'translateX(-50%)', background: 'radial-gradient(ellipse 50% 60% at 50% 60%, rgba(150,120,255,0.5) 0%, rgba(123,121,255,0.22) 40%, transparent 72%)', filter: 'blur(24px)' }}
+          />
 
-        {/* Nebula + starfield background */}
-        <GalaxyHero />
+          {/* Full-page revolving starfield */}
+          <StarCanvas />
 
-        {/* Glowing gradient logo with effects — sits in the circle, underlays the text */}
-        <HeroLogo />
+          {/* Glowing gradient logo — underlays the text */}
+          <HeroLogo />
+        </motion.div>
+
+        {/* Legibility scrim */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: 'radial-gradient(ellipse 60% 50% at 50% 42%, rgba(4,2,12,0.55) 0%, transparent 62%), linear-gradient(180deg, rgba(4,2,12,0.72) 0%, rgba(4,2,12,0.18) 26%, transparent 48%, rgba(4,2,12,0.3) 78%, rgba(4,2,12,0.55) 100%)' }} />
+        {/* Cinematic vignette */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, boxShadow: 'inset 0 0 200px 40px rgba(3,2,10,0.8)' }} />
 
         {/* Content */}
         <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1, width: '100%', textAlign: 'center' }} className="px-6 md:px-12">
@@ -657,7 +650,7 @@ export default function Home() {
           <motion.div initial={{ y: 24, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
             <KickerRule label="Programs" />
             <h2 style={{ marginBottom: '12px' }}>Two Programs. One Mission.</h2>
-            <p style={{ fontSize: '18px', color: '#3d3a52', marginBottom: '48px' }}>Different starting points. Same finish line.</p>
+            <p style={{ fontSize: '18px', color: '#3d3a52', marginBottom: '48px', maxWidth: '560px' }}>Different starting points. Same finish line.</p>
           </motion.div>
 
           <div style={{ display: 'grid', gap: '32px' }} className="grid-cols-1 md:grid-cols-2">
@@ -739,7 +732,7 @@ export default function Home() {
           <motion.div initial={{ y: 24, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
             <KickerRule label="Our Reach" />
             <h2 style={{ marginBottom: '12px' }}>Who We Serve</h2>
-            <p style={{ fontSize: '18px', color: '#3d3a52', marginBottom: '48px' }}>Every kid, regardless of what they have access to.</p>
+            <p style={{ fontSize: '18px', color: '#3d3a52', marginBottom: '48px', maxWidth: '560px' }}>Every kid, regardless of what they have access to.</p>
           </motion.div>
           <div style={{ display: 'grid', gap: '24px' }} className="grid-cols-1 md:grid-cols-2">
             {[

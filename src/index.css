@@ -75,6 +75,19 @@ button {
   cursor: pointer;
 }
 
+/* Respect users who prefer reduced motion — calm the ambient loops */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn-shimmer-inner,
+  [style*="pulseGlow"],
+  [style*="blobFloat"],
+  [style*="marquee"],
+  [style*="gwTwinkle"],
+  [style*="gwSheen"] {
+    animation: none !important;
+  }
+}
+
 @keyframes blobFloat1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   30% { transform: translate(24px, -36px) scale(1.06); }
