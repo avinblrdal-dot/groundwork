@@ -78,7 +78,7 @@ export default function Navbar() {
         height: `${BAR_H}px`,
         transform: retracted ? 'translateY(-100%)' : 'translateY(0)',
         // Transparent glass over the hero; solid everywhere else.
-        background: overHero ? 'rgba(9,7,26,0.82)' : '#0b0822',
+        background: overHero ? 'rgba(9,7,26,0.82)' : '#141033',
         backdropFilter: overHero ? 'blur(16px)' : 'none',
         WebkitBackdropFilter: overHero ? 'blur(16px)' : 'none',
         borderBottom: `1px solid ${overHero ? 'rgba(123,121,255,0.14)' : 'rgba(123,121,255,0.22)'}`,
