@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navLinks = [
@@ -10,22 +10,80 @@ const navLinks = [
   { label: 'Contact', to: '/contact' },
 ]
 
+const BAR_H = 72
+// Ignore sub-pixel/momentum jitter when reading scroll direction.
+const DIR_THRESHOLD = 6
+
 export default function Navbar() {
+  const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  // Shown because you're at the top of the page or scrolling up; hidden on the way down.
+  const [revealed, setRevealed] = useState(true)
+  // True only while the bar still sits over a page's dark full-bleed hero.
+  const [overHero, setOverHero] = useState(true)
+  const lastY = useRef(0)
+
+  useEffect(() => {
+    // Pages without a [data-hero] section have light content right under the bar,
+    // so it goes solid from the very top.
+    const heroDepth = () => {
+      const hero = document.querySelector('[data-hero]')
+      return hero ? hero.offsetTop + hero.offsetHeight - BAR_H : 0
+    }
+
+    const sync = () => {
+      const y = window.scrollY
+      setOverHero(y < heroDepth())
+      if (y <= BAR_H) setRevealed(true)
+      else if (y < lastY.current - DIR_THRESHOLD) setRevealed(true)
+      else if (y > lastY.current + DIR_THRESHOLD) setRevealed(false)
+      if (Math.abs(y - lastY.current) > DIR_THRESHOLD || y <= BAR_H) lastY.current = y
+    }
+
+    lastY.current = window.scrollY
+    sync()
+    window.addEventListener('scroll', sync, { passive: true })
+    window.addEventListener('resize', sync)
+    return () => {
+      window.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
+    }
+  }, [pathname])
+
+  // Retracts on the way down; hovering the top edge or scrolling up brings it back.
+  const retracted = !revealed && !hovered && !open
 
   return (
-    <header
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 50,
-        height: '72px',
-        background: 'rgba(9,7,26,0.82)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(123,121,255,0.14)',
+        // Shrunk to a thin strip while retracted so it only catches the top-edge hover
+        // instead of swallowing clicks on the page underneath.
+        height: retracted ? '14px' : `${BAR_H}px`,
+      }}
+    >
+    <header
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: `${BAR_H}px`,
+        transform: retracted ? 'translateY(-100%)' : 'translateY(0)',
+        // Transparent glass over the hero; solid everywhere else.
+        background: overHero ? 'rgba(9,7,26,0.82)' : '#0b0822',
+        backdropFilter: overHero ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: overHero ? 'blur(16px)' : 'none',
+        borderBottom: `1px solid ${overHero ? 'rgba(123,121,255,0.14)' : 'rgba(123,121,255,0.22)'}`,
+        boxShadow: overHero ? 'none' : '0 10px 30px rgba(0,0,0,0.45)',
+        transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
       }}
     >
       <div
@@ -206,5 +264,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </header>
+    </div>
   )
 }

@@ -442,7 +442,9 @@ function HeroLogo() {
           key={`ring-${i}`}
           animate={shouldReduce ? {} : { scale: [1, 1.02, 1], opacity: [0.5, 1, 0.5] }}
           transition={{ duration: r.d, repeat: Infinity, ease: 'easeInOut', delay: r.dl }}
-          style={{ position: 'absolute', top: '50%', left: '50%', width: `${r.s}%`, height: `${r.s}%`, transform: 'translate(-50%, -50%)', borderRadius: '50%', border: `1px solid ${r.c}` }}
+          // Centre with negative margins, not translate(-50%,-50%): the `scale` animation
+          // rewrites `transform`, which would drop the translate and shove the ring off-centre.
+          style={{ position: 'absolute', top: '50%', left: '50%', width: `${r.s}%`, height: `${r.s}%`, marginLeft: `${-r.s / 2}%`, marginTop: `${-r.s / 2}%`, borderRadius: '50%', border: `1px solid ${r.c}` }}
         />
       ))}
 
@@ -514,7 +516,7 @@ export default function Home() {
   return (
     <>
       {/* HERO — Cinematic Space */}
-      <section onMouseMove={onHeroMove} style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #06041a 0%, #0d0926 45%, #090718 100%)', paddingTop: '120px', paddingBottom: '96px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <section onMouseMove={onHeroMove} data-hero style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #06041a 0%, #0d0926 45%, #090718 100%)', paddingTop: '120px', paddingBottom: '96px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
 
         {/* Cinematic space atmosphere — moves subtly with the mouse (parallax) */}
         <motion.div style={{ position: 'absolute', inset: 0, x: psx, y: psy, zIndex: 0, pointerEvents: 'none' }}>
